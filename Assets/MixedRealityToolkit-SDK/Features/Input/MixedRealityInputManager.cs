@@ -74,6 +74,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
         private DictationEventData dictationEventData;
 
         private MixedRealityInputActionRulesProfile CurrentInputActionRulesProfile { get; set; }
+        private ILogger logger;
 
         #region IMixedRealityManager Implementation
 
@@ -88,6 +89,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
         {
             base.Initialize();
             CurrentInputActionRulesProfile = MixedRealityToolkit.Instance.ActiveProfile.InputSystemProfile.InputActionRulesProfile;
+            logger = MixedRealityToolkit.Instance.CreateLogger<MixedRealityInputManager>();
             InitializeInternal();
             InputEnabled?.Invoke();
         }
@@ -128,7 +130,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
 
                     if (raiseWarning)
                     {
-                        Debug.LogWarning("Found an existing event system in your scene. The Mixed Reality Input System requires only one, and must be found on the UIRaycastCamera.");
+                        logger.LogWarning("Found an existing event system in your scene. The Mixed Reality Input System requires only one, and must be found on the UIRaycastCamera.");
                     }
                 }
 
@@ -152,7 +154,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
 
                     if (raiseWarning)
                     {
-                        Debug.LogWarning("Found an existing Standalone Input Module in your scene. The Mixed Reality Input System requires only one, and must be found on the UIRaycastCamera.");
+                        logger.LogWarning("Found an existing Standalone Input Module in your scene. The Mixed Reality Input System requires only one, and must be found on the UIRaycastCamera.");
                     }
                 }
             }
@@ -259,14 +261,14 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
                 return;
             }
 
-            Debug.Assert(eventData != null);
+            logger.Assert(eventData != null);
             var baseInputEventData = ExecuteEvents.ValidateEventData<BaseInputEventData>(eventData);
-            Debug.Assert(baseInputEventData != null);
-            Debug.Assert(!baseInputEventData.used);
+            logger.Assert(baseInputEventData != null);
+            logger.Assert(!baseInputEventData.used);
 
             if (baseInputEventData.InputSource == null)
             {
-                Debug.LogError($"Failed to find an input source for {baseInputEventData}");
+                logger.LogError($"Failed to find an input source for {baseInputEventData}");
                 return;
             }
 
@@ -283,7 +285,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
 
             if (baseInputEventData.InputSource.Pointers == null)
             {
-                Debug.LogError($"InputSource {baseInputEventData.InputSource.SourceName} doesn't have any registered pointers! Input Sources without pointers should use the GazeProvider's pointer as a default fallback.");
+                logger.LogError($"InputSource {baseInputEventData.InputSource.SourceName} doesn't have any registered pointers! Input Sources without pointers should use the GazeProvider's pointer as a default fallback.");
                 return;
             }
 
@@ -322,7 +324,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
                     }
                     else
                     {
-                        Debug.LogError("ModalInput GameObject reference was null!\nDid this GameObject get destroyed?");
+                        logger.LogError("ModalInput GameObject reference was null!\nDid this GameObject get destroyed?");
                     }
                 }
 
@@ -395,7 +397,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
         public void PopInputDisable()
         {
             --disabledRefCount;
-            Debug.Assert(disabledRefCount >= 0, "Tried to pop more input disable than the amount pushed.");
+            logger.Assert(disabledRefCount >= 0, "Tried to pop more input disable than the amount pushed.");
 
             if (disabledRefCount == 0)
             {
@@ -521,7 +523,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
             // Create input event
             sourceStateEventData.Initialize(source, controller);
 
-            Debug.Assert(!DetectedInputSources.Contains(source), $"{source.SourceName} has already been registered with the Input Manager!");
+            logger.Assert(!DetectedInputSources.Contains(source), $"{source.SourceName} has already been registered with the Input Manager!");
 
             DetectedInputSources.Add(source);
 
@@ -547,7 +549,7 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
             // Create input event
             sourceStateEventData.Initialize(source, controller);
 
-            Debug.Assert(DetectedInputSources.Contains(source), $"{source.SourceName} was never registered with the Input Manager!");
+            logger.Assert(DetectedInputSources.Contains(source), $"{source.SourceName} was never registered with the Input Manager!");
 
             DetectedInputSources.Remove(source);
 
@@ -1482,13 +1484,13 @@ namespace Microsoft.MixedReality.Toolkit.SDK.Input
                 {
                     if (inputActionRules[i].RuleAction == inputAction)
                     {
-                        Debug.LogError("Input Action Rule cannot be the same as the rule's Base Action!");
+                        logger.LogError("Input Action Rule cannot be the same as the rule's Base Action!");
                         return inputAction;
                     }
 
                     if (inputActionRules[i].BaseAction.AxisConstraint != inputActionRules[i].RuleAction.AxisConstraint)
                     {
-                        Debug.LogError("Input Action Rule doesn't have the same Axis Constraint as the Base Action!");
+                        logger.LogError("Input Action Rule doesn't have the same Axis Constraint as the Base Action!");
                         return inputAction;
                     }
 

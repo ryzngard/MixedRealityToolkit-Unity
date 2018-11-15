@@ -106,6 +106,13 @@ namespace Microsoft.MixedReality.Toolkit.Core.Services
             InitializeServiceLocator();
         }
 
+        private ILogger loggerInstance = new DebugLogger((LoggingLevels)-1); // Create with whatever, maybe have an update to the logging level
+        public ILogger CreateLogger<T>() 
+        {
+            // Could provide more detailed logger information, but for now share instance across everything.
+            return loggerInstance;
+        }
+
         #endregion Mixed Reality Toolkit Profile configuration
 
         #region Mixed Reality runtime component registry
